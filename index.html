@@ -24,7 +24,7 @@
 
     <script>
       var socket = io();
-
+      const nickName = prompt('Nhập nick ku');
       var messages = document.getElementById('messages');
       var form = document.getElementById('form');
       var input = document.getElementById('input');
@@ -32,7 +32,7 @@
       form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (input.value) {
-          socket.emit('chat-message', input.value);
+          socket.emit('chat-message', `${nickName} ${input.value}`);
           input.value = '';
         }
       });
