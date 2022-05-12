@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap");
+
+body {
+  font-family: "Roboto Mono", monospace;
+  width: 100vw;
+  height: 100vh;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+#title {
+  margin: 6rem auto 1rem auto;
+}
+
+#chat-box {
+  width: 25%;
+  height: 50%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  overflow: hidden;
+ 
+}
+
+#message-input {
+  flex-grow: 1;
+  outline: none;
+}
+
+#messages {
+  display: block;
+}
+
+ul {
+  padding-left: 0.5rem;
+  list-style: none;
+  word-break: break-word;
+}
+
+ul li::before {
+  content: "\2713";
+  color: green;
+}
+
+li {
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+#form {
+  display: flex;
+  width: 100%;
+}
+
+#message-input {
+  border: 1px solid lightgray;
+  height: 1.5rem;
+  border-radius: 3px;
+  font-family: "Roboto Mono", monospace;
+}
+
+#send-btn {
+  border: none;
+  font-family: "Roboto Mono", monospace;
+  margin-left: 0.5rem;
+}
