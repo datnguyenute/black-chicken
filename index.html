@@ -5,7 +5,7 @@
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="css/style.css" />
   </head>
-  <body>
+  <body onload="notifyMe()">
     <h2 id="title">Work Note</h2>
     <div id="chat-box">
       <ul id="messages"></ul>
@@ -27,6 +27,10 @@
         e.preventDefault();
         if (input.value) {
           socket.emit("chat-message", `${nickName}- ${input.value}`);
+          var notify = new Notification('Work Note', {
+                body: `${nickName}- ${input.value}`,
+                icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+          });
           input.value = "";
         }
       });
@@ -37,6 +41,36 @@
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       });
+
+      function notifyMe() {
+    if (!window.Notification) {
+        console.log('Trình duyệt méo hỗ trợ hiện notification. Chọn cái trình duyệt khác đi bro!');
+    } else {
+        // check if permission is already granted
+        if (Notification.permission === 'granted') {
+            // show notification here
+            var notify = new Notification('Work Note', {
+                body: 'Push notification đã được bật sẵn! Get go!',
+                icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+            });
+        } else {
+            // request permission from user
+            Notification.requestPermission().then(function (p) {
+                if (p === 'granted') {
+                    // show notification here
+                    var notify = new Notification('Work Note', {
+                        body: 'Ngon! Notification đã được bật',
+                        icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+                    });
+                } else {
+                    console.log('Người ấy không thích notification!');
+                }
+            }).catch(function (err) {
+                console.error(err);
+            });
+        }
+    }
+}
     </script>
   </body>
 </html>
