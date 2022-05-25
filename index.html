@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Work Note</title>
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body onload="notifyMe()">
@@ -17,6 +17,7 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <script>
+      var isOnScreen = true;
       var socket = io();
       const nickName = prompt("Nhập nick ku");
       var messages = document.getElementById("messages");
@@ -27,7 +28,7 @@
         e.preventDefault();
         if (input.value) {
           const messageUser = `${nickName}- ${input.value}`;
-          console.log('Submit message: ', messageUser);
+          console.log("Submit message: ", messageUser);
           socket.emit("chat-message", messageUser);
 
           // Reset value input
@@ -45,10 +46,12 @@
         window.scrollTo(0, document.body.scrollHeight);
       });
 
-      socket.on('notify-everyone',function(msg){
-        console.log('Get message from notify everyone!', msg);
+      socket.on("notify-everyone", function (msg) {
+        console.log('isOnScreen', isOnScreen);
+        if (isOnScreen) return;
+        console.log("Get message from notify everyone!", msg);
         // Will explain in next section.
-        var notify = new Notification('Work Note', {
+        var notify = new Notification("Work Note", {
           body: msg,
           icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
         });
@@ -56,32 +59,97 @@
 
       function notifyMe() {
         if (!window.Notification) {
-            console.log('Trình duyệt méo hỗ trợ hiện notification. Chọn cái trình duyệt khác đi bro!');
+          console.log(
+            "Trình duyệt méo hỗ trợ hiện notification. Chọn cái trình duyệt khác đi bro!"
+          );
         } else {
-            // check if permission is already granted
-            if (Notification.permission === 'granted') {
-                // show notification here
-                var notify = new Notification('Work Note', {
-                    body: 'Push notification đã được bật sẵn! Get go!',
+          // check if permission is already granted
+          if (Notification.permission === "granted") {
+            // show notification here
+            var notify = new Notification("Work Note", {
+              body: "Push notification đã được bật sẵn! Get go!",
+              icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+            });
+          } else {
+            // request permission from user
+            Notification.requestPermission()
+              .then(function (p) {
+                if (p === "granted") {
+                  // show notification here
+                  var notify = new Notification("Work Note", {
+                    body: "Ngon! Notification đã được bật",
                     icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-                });
-            } else {
-                // request permission from user
-                Notification.requestPermission().then(function (p) {
-                    if (p === 'granted') {
-                        // show notification here
-                        var notify = new Notification('Work Note', {
-                            body: 'Ngon! Notification đã được bật',
-                            icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-                        });
-                    } else {
-                        console.log('Người ấy không thích notification!');
-                    }
-                }).catch(function (err) {
-                    console.error(err);
-                });
-            }
+                  });
+                } else {
+                  console.log("Người ấy không thích notification!");
+                }
+              })
+              .catch(function (err) {
+                console.error(err);
+              });
+          }
         }
+      }
+
+      // Set the name of the hidden property and the change event for visibility
+      var hidden, visibilityChange;
+      if (typeof document.hidden !== "undefined") {
+        // Opera 12.10 and Firefox 18 and later support
+        hidden = "hidden";
+        visibilityChange = "visibilitychange";
+      } else if (typeof document.msHidden !== "undefined") {
+        hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+      } else if (typeof document.webkitHidden !== "undefined") {
+        hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
+      }
+
+
+      // If the page is hidden, pause the video;
+      // if the page is shown, play the video
+      function handleVisibilityChange() {
+        if (document[hidden]) {
+          isOnScreen = false;
+        } else {
+          isOnScreen = true;
+        }
+      }
+
+      // Warn if the browser doesn't support addEventListener or the Page Visibility API
+      if (
+        typeof document.addEventListener === "undefined" ||
+        hidden === undefined
+      ) {
+        console.log(
+          "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
+        );
+      } else {
+        // Handle page visibility change
+        document.addEventListener(
+          visibilityChange,
+          handleVisibilityChange,
+          false
+        );
+
+        // When the video pauses, set the title.
+        // This shows the paused
+        videoElement.addEventListener(
+          "pause",
+          function () {
+            document.title = "Paused";
+          },
+          false
+        );
+
+        // When the video plays, set the title.
+        videoElement.addEventListener(
+          "play",
+          function () {
+            document.title = "Playing";
+          },
+          false
+        );
       }
     </script>
   </body>
