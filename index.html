@@ -35,10 +35,10 @@
           console.log("Submit message: ", messageUser);
           socket.emit("chat-message", messageUser);
 
+          // Notify every one, emit event for client.
+          socket.emit("notify-everyone", { message: input.value, messageUser });
           // Reset value input.
           input.value = "";
-          // Notify every one, emit event for client.
-          socket.emit("notify-everyone", messageUser);
         }
       });
 
@@ -49,9 +49,9 @@
         window.scrollTo(0, document.body.scrollHeight);
       });
 
-      socket.on("notify-everyone", function (msg) {
+      socket.on("notify-everyone", function ({ message, messageUser }) {
         // play sound
-        switch (msg) {
+        switch (message) {
           case "/loa":
             sound = loaSound;
             break;
@@ -61,13 +61,22 @@
           default:
             break;
         }
-        sound.play();
+        var resp = sound.play();
+        if (resp !== undefined) {
+          resp
+            .then((_) => {
+              // autoplay starts!
+            })
+            .catch((error) => {
+              //show error
+            });
+        }
         console.log("isOnScreen", isOnScreen);
         if (isOnScreen) return;
-        console.log("Get message from notify everyone!", msg);
+        console.log("Get message from notify everyone!", messageUser);
         // Will explain in next section.
         var notify = new Notification("Work Note", {
-          body: msg,
+          body: messageUser,
           icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
         });
       });
@@ -143,25 +152,6 @@
         document.addEventListener(
           visibilityChange,
           handleVisibilityChange,
-          false
-        );
-
-        // When the video pauses, set the title.
-        // This shows the paused
-        videoElement.addEventListener(
-          "pause",
-          function () {
-            document.title = "Paused";
-          },
-          false
-        );
-
-        // When the video plays, set the title.
-        videoElement.addEventListener(
-          "play",
-          function () {
-            document.title = "Playing";
-          },
           false
         );
       }
