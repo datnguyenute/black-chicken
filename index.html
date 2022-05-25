@@ -26,12 +26,15 @@
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         if (input.value) {
-          socket.emit("chat-message", `${nickName}- ${input.value}`);
-          var notify = new Notification('Work Note', {
-                body: `${nickName}- ${input.value}`,
-                icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-          });
+          const messageUser = `${nickName}- ${input.value}`;
+          console.log('Submit message: ', messageUser);
+          socket.emit("chat-message", messageUser);
+
+          // Reset value input
           input.value = "";
+
+          // Notify every one, emit event for client.
+          socket.emit("notify-everyone", messageUser);
         }
       });
 
@@ -42,35 +45,44 @@
         window.scrollTo(0, document.body.scrollHeight);
       });
 
+      socket.on('notify-everyone',function(msg){
+        console.log('Get message from notify everyone!', msg);
+        // Will explain in next section.
+        var notify = new Notification('Work Note', {
+          body: msg,
+          icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+        });
+      });
+
       function notifyMe() {
-    if (!window.Notification) {
-        console.log('Trình duyệt méo hỗ trợ hiện notification. Chọn cái trình duyệt khác đi bro!');
-    } else {
-        // check if permission is already granted
-        if (Notification.permission === 'granted') {
-            // show notification here
-            var notify = new Notification('Work Note', {
-                body: 'Push notification đã được bật sẵn! Get go!',
-                icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-            });
+        if (!window.Notification) {
+            console.log('Trình duyệt méo hỗ trợ hiện notification. Chọn cái trình duyệt khác đi bro!');
         } else {
-            // request permission from user
-            Notification.requestPermission().then(function (p) {
-                if (p === 'granted') {
-                    // show notification here
-                    var notify = new Notification('Work Note', {
-                        body: 'Ngon! Notification đã được bật',
-                        icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-                    });
-                } else {
-                    console.log('Người ấy không thích notification!');
-                }
-            }).catch(function (err) {
-                console.error(err);
-            });
+            // check if permission is already granted
+            if (Notification.permission === 'granted') {
+                // show notification here
+                var notify = new Notification('Work Note', {
+                    body: 'Push notification đã được bật sẵn! Get go!',
+                    icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+                });
+            } else {
+                // request permission from user
+                Notification.requestPermission().then(function (p) {
+                    if (p === 'granted') {
+                        // show notification here
+                        var notify = new Notification('Work Note', {
+                            body: 'Ngon! Notification đã được bật',
+                            icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+                        });
+                    } else {
+                        console.log('Người ấy không thích notification!');
+                    }
+                }).catch(function (err) {
+                    console.error(err);
+                });
+            }
         }
-    }
-}
+      }
     </script>
   </body>
 </html>

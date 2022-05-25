@@ -15,6 +15,11 @@ io.on('connection', (socket) => {
   socket.on('chat-message', msg => {
     io.emit('chat-message', msg);
   });
+
+  socket.on('notify-everyone', msg => {
+    socket.broadcast.emit('notify-everyone', msg);
+    // io.emit('notify-everyone', msg);
+  });
 });
 
 http.listen(port, () => {
