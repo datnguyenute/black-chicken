@@ -17,6 +17,10 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <script>
+      var loaSound = new Audio("assets/loa.mp3");
+      var gentleSound = new Audio("assets/gentle.mp3");
+      var sound = loaSound;
+
       var isOnScreen = true;
       var socket = io();
       const nickName = prompt("Nhập nick ku");
@@ -31,9 +35,8 @@
           console.log("Submit message: ", messageUser);
           socket.emit("chat-message", messageUser);
 
-          // Reset value input
+          // Reset value input.
           input.value = "";
-
           // Notify every one, emit event for client.
           socket.emit("notify-everyone", messageUser);
         }
@@ -47,7 +50,19 @@
       });
 
       socket.on("notify-everyone", function (msg) {
-        console.log('isOnScreen', isOnScreen);
+        // play sound
+        switch (msg) {
+          case "/loa":
+            sound = loaSound;
+            break;
+          case "/gentle":
+            sound = gentleSound;
+            break;
+          default:
+            break;
+        }
+        sound.play();
+        console.log("isOnScreen", isOnScreen);
         if (isOnScreen) return;
         console.log("Get message from notify everyone!", msg);
         // Will explain in next section.
@@ -104,7 +119,6 @@
         hidden = "webkitHidden";
         visibilityChange = "webkitvisibilitychange";
       }
-
 
       // If the page is hidden, pause the video;
       // if the page is shown, play the video
