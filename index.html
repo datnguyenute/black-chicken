@@ -35,6 +35,18 @@
           console.log("Submit message: ", messageUser);
           socket.emit("chat-message", messageUser);
 
+          // set sound
+          switch (input.value) {
+            case "/loa":
+              sound = loaSound;
+              break;
+            case "/gentle":
+              sound = gentleSound;
+              break;
+            default:
+              break;
+          }
+
           // Notify every one, emit event for client.
           socket.emit("notify-everyone", { message: input.value, messageUser });
           // Reset value input.
@@ -51,16 +63,6 @@
 
       socket.on("notify-everyone", function ({ message, messageUser }) {
         // play sound
-        switch (message) {
-          case "/loa":
-            sound = loaSound;
-            break;
-          case "/gentle":
-            sound = gentleSound;
-            break;
-          default:
-            break;
-        }
         var resp = sound.play();
         if (resp !== undefined) {
           resp
