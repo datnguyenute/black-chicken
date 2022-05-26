@@ -32,7 +32,6 @@
         e.preventDefault();
         if (input.value) {
           const messageUser = `${nickName}- ${input.value}`;
-          console.log("Submit message: ", messageUser);
           socket.emit("chat-message", messageUser);
 
           // set sound
@@ -78,7 +77,6 @@
         }
         console.log("isOnScreen", isOnScreen);
         if (isOnScreen) return;
-        console.log("Get message from notify everyone!", messageUser);
         // Will explain in next section.
         var notify = new Notification("Work Note", {
           body: messageUser,

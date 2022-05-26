@@ -69,3 +69,7 @@ li {
   font-family: "Roboto Mono", monospace;
   margin-left: 0.5rem;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
