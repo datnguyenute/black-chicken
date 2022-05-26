@@ -23,8 +23,6 @@ body {
   flex-direction: column;
   justify-content: flex-end;
   align-items: flex-start;
-  overflow: hidden;
- 
 }
 
 #message-input {
@@ -34,6 +32,8 @@ body {
 
 #messages {
   display: block;
+  width: 100%;
+  overflow-y: scroll;
 }
 
 ul {

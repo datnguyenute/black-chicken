@@ -58,7 +58,10 @@
         var item = document.createElement("li");
         item.textContent = msg;
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
+
+        const elem = document.getElementById('messages');
+        elem.scrollTop = elem.scrollHeight;
+
       });
 
       socket.on("notify-everyone", function ({ message, messageUser }) {
