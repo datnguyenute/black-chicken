@@ -4,7 +4,7 @@ body {
   font-family: "Roboto Mono", monospace;
   width: 100vw;
   height: 100vh;
-  font-size: 16px;
+  font-size: 14px;
   display: flex;
   flex-direction: column;
   font-weight: 500;
@@ -47,6 +47,16 @@ ul li::before {
   color: green;
 }
 
+ul li.sub-message {
+  font-size: 10px;
+  font-weight: lighter;
+}
+
+ul li.sub-message::before {
+  content: "\26A1";
+  color: rgb(167, 125, 0);
+}
+
 li {
   word-wrap: break-word;
   max-width: 100%;
@@ -72,4 +82,12 @@ li {
 
 ::-webkit-scrollbar {
   display: none;
+}
+
+#typing {
+  padding-left: 1rem;
+  margin-top: -13px;
+  font-size: 10px;
+  font-weight: lighter;
+  visibility: hidden;
 }

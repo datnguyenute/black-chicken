@@ -9,6 +9,7 @@
     <h2 id="title">Work Note</h2>
     <div id="chat-box">
       <ul id="messages"></ul>
+      <div id="typing"></div>
       <form id="form" action="">
         <input id="message-input" autocomplete="off" />
         <button id="send-btn">Note</button>
@@ -27,6 +28,19 @@
       var messages = document.getElementById("messages");
       var form = document.getElementById("form");
       var input = document.getElementById("message-input");
+      var typingElement = document.getElementById("typing");
+      var typing = false;
+      var timeoutTyping = undefined;
+      var socketTypeing = [];
+
+      // Greetings
+      let greetings = '';
+      if (nickName) {
+        greetings = `Task "${nickName}"" has created`;
+      } else {
+        greetings = "A task has created but it doesn't have a fucking name!";
+      }
+      socket.emit('sub-chat-message', greetings);
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -34,13 +48,21 @@
           const messageUser = `${nickName}- ${input.value}`;
           socket.emit("chat-message", messageUser);
 
-          // set sound
+          // Command setting
+          const mainCommand = 'kimmy';
+          const subCommand = {
+            SOUND: 'sound',
+            STATUS: 'status'
+          }
           switch (input.value) {
-            case "/loa":
+            case mainCommand + ' ' + subCommand.SOUND + ' ' + '-loa':
               sound = loaSound;
               break;
-            case "/gentle":
+            case mainCommand + ' ' + subCommand.SOUND + ' ' + '-gentle':
               sound = gentleSound;
+              break;
+            case mainCommand + ' ' + subCommand.STATUS + ' ' + '-c':
+              socket.emit('status-count');
               break;
             default:
               break;
@@ -53,6 +75,16 @@
         }
       });
 
+      input.addEventListener("keydown", function (e) {
+        console.log('Keydown value: ', e.target.value);
+
+        if(e.which!=13 && e.keyCode!=13) {
+          console.log('Emit typing');
+          onKeyDownNotEnter();
+        }
+      });
+
+
       socket.on("chat-message", function (msg) {
         var item = document.createElement("li");
         item.textContent = msg;
@@ -60,7 +92,33 @@
 
         const elem = document.getElementById('messages');
         elem.scrollTop = elem.scrollHeight;
+      });
 
+      socket.on("sub-chat-message", function (msg) {
+        var item = document.createElement("li");
+        item.textContent = msg;
+        item.classList.add('sub-message');
+        messages.appendChild(item);
+
+        // Scroll to bottom
+        const elem = document.getElementById('messages');
+        elem.scrollTop = elem.scrollHeight;
+      });
+
+      socket.on("typing", function (user) {
+        // Add user to list
+        if (!socketTypeing.includes(user.nickName)) {
+          socketTypeing.push(user.nickName);
+        }
+
+        updateTypingElement();
+      });
+
+      socket.on("typing-no-longer", function (user) {
+        // remove user to list
+        socketTypeing = socketTypeing.filter(e => e != user.nickName);
+
+        updateTypingElement();
       });
 
       socket.on("notify-everyone", function ({ message, messageUser }) {
@@ -83,6 +141,42 @@
           icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
         });
       });
+
+      function updateTypingElement() {
+        if (socketTypeing.length < 1) {
+          typingElement.style.visibility = 'hidden';
+          return;
+        }
+
+        let typingUser = '';
+        if (socketTypeing.length == 1) {
+          typingUser = socketTypeing[0] + ' task';
+        } else {
+          typingUser = 'Some tasks'
+        }
+        const contentTyping = typingUser + ' progressing… ';
+
+
+        typingElement.textContent = contentTyping;
+        typingElement.style.visibility = 'visible';
+      }
+
+      function timeoutFunction(){
+        typing = false;
+        socket.emit('typing-no-longer', {nickName});
+      }
+
+      function onKeyDownNotEnter(){
+        if(typing == false) {
+          typing = true
+          socket.emit('typing', {nickName});
+          timeoutTyping = setTimeout(timeoutFunction, 5000);
+        } else {
+          clearTimeout(timeoutTyping);
+          timeoutTyping = setTimeout(timeoutFunction, 5000);
+        }
+
+      }
 
       function notifyMe() {
         if (!window.Notification) {
