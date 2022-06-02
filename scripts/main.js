@@ -9,6 +9,7 @@ var messages = document.getElementById("messages");
 var form = document.getElementById("form");
 var input = document.getElementById("message-input");
 var typingElement = document.getElementById("typing");
+var chatboxElement = document.getElementById("chat-box");
 var typing = false;
 var timeoutTyping = undefined;
 var socketTypeing = [];
@@ -16,7 +17,7 @@ var socketTypeing = [];
 // Greetings
 let greetings = '';
 if (nickName) {
-  greetings = `Task "${nickName}"" has created`;
+  greetings = `Task "${nickName}" has created`;
 } else {
   greetings = "A task has created but it doesn't have a fucking name!";
 }
@@ -32,7 +33,13 @@ form.addEventListener("submit", function (e) {
     const mainCommand = 'kimmy';
     const subCommand = {
       SOUND: 'sound',
-      STATUS: 'status'
+      STATUS: 'status',
+      RESET: 'reset'
+    }
+    const subCommandShort = {
+      SOUND: 's',
+      STATUS: 'st',
+      RESET: 'rs'
     }
     switch (input.value) {
       case mainCommand + ' ' + subCommand.SOUND + ' ' + '-loa':
@@ -40,6 +47,12 @@ form.addEventListener("submit", function (e) {
         break;
       case mainCommand + ' ' + subCommand.SOUND + ' ' + '-gentle':
         sound = gentleSound;
+        break;
+      case mainCommand + ' ' + subCommand.RESET:
+        resetKimmy();
+        break;
+      case mainCommand + ' ' + subCommand.RESET + ' ' + '-a':
+        resetKimmy(true);
         break;
       case mainCommand + ' ' + subCommand.STATUS + ' ' + '-c':
         socket.emit('status-count');
@@ -58,6 +71,7 @@ form.addEventListener("submit", function (e) {
 input.addEventListener("keydown", function (e) {
   console.log('Keydown value: ', e.target.value);
 
+  // Check keypress Enter
   if(e.which!=12 && e.keyCode!=13) {
     console.log('Emit typing');
     onKeyDownNotEnter();
@@ -70,8 +84,7 @@ socket.on("chat-message", function (msg) {
   item.textContent = msg;
   messages.appendChild(item);
 
-  const elem = document.getElementById('messages');
-  elem.scrollTop = elem.scrollHeight;
+  messages.scrollTop = messages.scrollHeight;
 });
 
 socket.on("sub-chat-message", function (msg) {
@@ -81,8 +94,7 @@ socket.on("sub-chat-message", function (msg) {
   messages.appendChild(item);
 
   // Scroll to bottom
-  const elem = document.getElementById('messages');
-  elem.scrollTop = elem.scrollHeight;
+  messages.scrollTop = messages.scrollHeight;
 });
 
 socket.on("typing", function (user) {
@@ -156,6 +168,24 @@ function onKeyDownNotEnter(){
     timeoutTyping = setTimeout(timeoutFunction, 4999);
   }
 
+}
+
+// Function: Reset kimmy
+function resetKimmy(realReset = false) {
+  if (!realReset) {
+    var item = document.createElement("li");
+    const scrollHeight = chatboxElement.clientHeight;
+    item.style.height = scrollHeight + 'px';
+    item.classList.add('sub-message');
+    item.textContent = 'Kimmy fake reset';
+    messages.appendChild(item);
+
+    // Scroll to bottom
+    messages.scrollTop = scrollHeight;
+  } else {
+    // Remove all content item
+    messages.textContent = '';
+  }
 }
 
 function notifyMe() {
