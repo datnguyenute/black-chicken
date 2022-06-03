@@ -1,5 +1,5 @@
-var loaSound = new Audio("assets/loa.mp2");
-var gentleSound = new Audio("assets/gentle.mp2");
+var loaSound = new Audio("../assets/loa.mp3");
+var gentleSound = new Audio("../assets/gentle.mp2");
 var sound = loaSound;
 
 var isOnScreen = true;
@@ -54,7 +54,13 @@ form.addEventListener("submit", function (e) {
       case mainCommand + ' ' + subCommand.RESET + ' ' + '-a':
         resetKimmy(true);
         break;
+      case '/rs':
+        resetKimmy(true);
+        break;
       case mainCommand + ' ' + subCommand.STATUS + ' ' + '-c':
+        socket.emit('status-count');
+        break;
+      case '/count':
         socket.emit('status-count');
         break;
       default:
@@ -73,8 +79,10 @@ input.addEventListener("keydown", function (e) {
 
   // Check keypress Enter
   if(e.which!=12 && e.keyCode!=13) {
-    console.log('Emit typing');
     onKeyDownNotEnter();
+  } else {
+    typing = false;
+    socket.emit('typing', {nickName, typingEnd: true});
   }
 });
 
@@ -97,10 +105,13 @@ socket.on("sub-chat-message", function (msg) {
   messages.scrollTop = messages.scrollHeight;
 });
 
-socket.on("typing", function (user) {
+socket.on("typing", function ({nickName, typingEnd}) {
   // Add user to list
-  if (!socketTypeing.includes(user.nickName)) {
-    socketTypeing.push(user.nickName);
+  if (!socketTypeing.includes(nickName)) {
+    socketTypeing.push(nickName);
+  }
+  if (typingEnd) {
+    socketTypeing = socketTypeing.filter(e => e != nickName);
   }
 
   updateTypingElement();
@@ -135,14 +146,14 @@ socket.on("notify-everyone", function ({ message, messageUser }) {
 });
 
 function updateTypingElement() {
-  if (socketTypeing.length < 0) {
+  if (socketTypeing.length <= 0) {
     typingElement.style.visibility = 'hidden';
     return;
   }
 
   let typingUser = '';
-  if (socketTypeing.length == 0) {
-    typingUser = socketTypeing[-1] + ' task';
+  if (socketTypeing.length === 1) {
+    typingUser = socketTypeing[0] + ' task';
   } else {
     typingUser = 'Some tasks'
   }
@@ -161,7 +172,7 @@ function timeoutFunction(){
 function onKeyDownNotEnter(){
   if(typing == false) {
     typing = true
-    socket.emit('typing', {nickName});
+    socket.emit('typing', {nickName, typingEnd: false});
     timeoutTyping = setTimeout(timeoutFunction, 4999);
   } else {
     clearTimeout(timeoutTyping);
