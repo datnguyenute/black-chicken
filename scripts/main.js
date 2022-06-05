@@ -4,12 +4,13 @@ var sound = loaSound;
 
 var isOnScreen = true;
 var socket = io();
-const nickName = prompt("Nhập nick ku");
+var nickName = prompt("Nhập nick ku");
 var messages = document.getElementById("messages");
 var form = document.getElementById("form");
 var input = document.getElementById("message-input");
 var typingElement = document.getElementById("typing");
 var chatboxElement = document.getElementById("chat-box");
+var titleElement = document.getElementById("title");
 var typing = false;
 var timeoutTyping = undefined;
 var socketTypeing = [];
@@ -19,9 +20,11 @@ let greetings = '';
 if (nickName) {
   greetings = `Task "${nickName}" has created`;
 } else {
+  nickName = '👽'
   greetings = "A task has created but it doesn't have a fucking name!";
 }
 socket.emit('sub-chat-message', greetings);
+socket.emit('status-count');
 
 form.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -75,10 +78,8 @@ form.addEventListener("submit", function (e) {
 });
 
 input.addEventListener("keydown", function (e) {
-  console.log('Keydown value: ', e.target.value);
-
   // Check keypress Enter
-  if(e.which!=12 && e.keyCode!=13) {
+  if(e.which!=13 && e.keyCode!=13) {
     onKeyDownNotEnter();
   } else {
     typing = false;
@@ -87,15 +88,17 @@ input.addEventListener("keydown", function (e) {
 });
 
 
-socket.on("chat-message", function (msg) {
+socket.on("chat-message", function (msg, count) {
   var item = document.createElement("li");
   item.textContent = msg;
   messages.appendChild(item);
 
   messages.scrollTop = messages.scrollHeight;
+
+  securityCheck(count);
 });
 
-socket.on("sub-chat-message", function (msg) {
+socket.on("sub-chat-message", function (msg, count) {
   var item = document.createElement("li");
   item.textContent = msg;
   item.classList.add('sub-message');
@@ -103,6 +106,8 @@ socket.on("sub-chat-message", function (msg) {
 
   // Scroll to bottom
   messages.scrollTop = messages.scrollHeight;
+
+  securityCheck(count);
 });
 
 socket.on("typing", function ({nickName, typingEnd}) {
@@ -136,7 +141,6 @@ socket.on("notify-everyone", function ({ message, messageUser }) {
         //show error
       });
   }
-  console.log("isOnScreen", isOnScreen);
   if (isOnScreen) return;
   // Will explain in next section.
   var notify = new Notification("Work Note", {
@@ -146,7 +150,7 @@ socket.on("notify-everyone", function ({ message, messageUser }) {
 });
 
 function updateTypingElement() {
-  if (socketTypeing.length <= 0) {
+  if (socketTypeing.length == 0) {
     typingElement.style.visibility = 'hidden';
     return;
   }
@@ -173,10 +177,10 @@ function onKeyDownNotEnter(){
   if(typing == false) {
     typing = true
     socket.emit('typing', {nickName, typingEnd: false});
-    timeoutTyping = setTimeout(timeoutFunction, 4999);
+    timeoutTyping = setTimeout(timeoutFunction, 5000);
   } else {
     clearTimeout(timeoutTyping);
-    timeoutTyping = setTimeout(timeoutFunction, 4999);
+    timeoutTyping = setTimeout(timeoutFunction, 5000);
   }
 
 }
@@ -196,6 +200,22 @@ function resetKimmy(realReset = false) {
   } else {
     // Remove all content item
     messages.textContent = '';
+  }
+}
+
+// Security warning anonymous
+function securityCheck(count) {
+  if (count) {
+    if (count == 3) {
+      // Warning
+      titleElement.style.color = 'orange';
+    } else if (count > 3) {
+      titleElement.style.color = 'red';
+      // Danger
+    } else {
+      // Normal 2 kimmy
+      titleElement.style.color = 'black';
+    }
   }
 }
 

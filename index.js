@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('chat-message', msg => {
-    io.emit('chat-message', msg);
+    io.emit('chat-message', msg, io.engine.clientsCount);
   });
 
   // Add sub message
@@ -25,18 +25,17 @@ io.on('connection', (socket) => {
   // Notify to others
   socket.on('notify-everyone', msg => {
     socket.broadcast.emit('notify-everyone', msg);
-    // io.emit('notify-everyone', msg);
   });
 
   socket.on('disconnect', () => {
     const mess = `A task has done. Remain tasks: ${io.engine.clientsCount}`;
-    io.emit('sub-chat-message', mess);
+    io.emit('sub-chat-message', mess, io.engine.clientsCount);
   });
 
   // Get current count
   socket.on('status-count', () => {
     const mess = `Current number of task: ${io.engine.clientsCount}`;
-    io.emit('sub-chat-message', mess);
+    io.emit('sub-chat-message', mess, io.engine.clientsCount);
   });
 
   // Typing and no longer typing
