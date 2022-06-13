@@ -66,6 +66,16 @@ ul li.sub-message::before {
   color: rgb(167, 125, 0);
 }
 
+ul li.sub-reply {
+  font-size: 10px;
+  font-weight: lighter;
+}
+
+ul li.sub-reply::before {
+  content: "\21AA";
+  color: rgb(167, 125, 0);
+}
+
 li {
   word-wrap: break-word;
   max-width: 100%;
