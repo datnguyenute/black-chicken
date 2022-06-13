@@ -14,6 +14,7 @@ var titleElement = document.getElementById("title");
 var typing = false;
 var timeoutTyping = undefined;
 var socketTypeing = [];
+var textContent = "";
 
 // Greetings
 let greetings = '';
@@ -89,6 +90,14 @@ input.addEventListener("keydown", function (e) {
 
 
 socket.on("chat-message", function (msg, count) {
+  if (textContent) {
+    var item = document.createElement("li");
+    item.textContent = `Reply: ${textContent}`;
+    item.classList.add('sub-reply');
+    messages.appendChild(item);
+    textContent = "";
+  }
+
   var item = document.createElement("li");
   item.classList.add("message");
   item.textContent = msg;
@@ -306,7 +315,18 @@ if (
  * event.
  */
 function reply(event) {
-  input.value = `[ ${event.target.textContent} ] > `;
+  const val = event.target.textContent || "";
+  const nicknameIdx = nickName.length + 2; // 2 stands for "- "
+
+  if (!val) {
+    return;
+  }
+
+  textContent = val.substring(nicknameIdx);
+  const doubleGreaterIdx = textContent.indexOf(">> ");
+  textContent = doubleGreaterIdx < 0 ? val.substring(nicknameIdx) : textContent.substring(doubleGreaterIdx + 3); // 3 stands for ">> "
+
+  input.value = `>> `;
   input.focus(); //sets focus to element
   const _val = input.value; //store the value of the element
   input.value = ''; //clear the value of the element
