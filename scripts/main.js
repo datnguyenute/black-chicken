@@ -90,10 +90,14 @@ input.addEventListener("keydown", function (e) {
 
 socket.on("chat-message", function (msg, count) {
   var item = document.createElement("li");
+  item.classList.add("message");
   item.textContent = msg;
   messages.appendChild(item);
 
   messages.scrollTop = messages.scrollHeight;
+
+  // Handle click event
+  item.addEventListener("click", reply);
 
   securityCheck(count);
 });
@@ -292,4 +296,19 @@ if (
     handleVisibilityChange,
     false
   );
+}
+
+/**
+ * It sets the value of the input to the text content of the clicked element, then sets the focus to
+ * the input, then stores the value of the input, then clears the value of the input, then sets the
+ * value of the input to the stored value.
+ * @param event - The event object is a JavaScript object that contains useful information about an
+ * event.
+ */
+function reply(event) {
+  input.value = `[ ${event.target.textContent} ] > `;
+  input.focus(); //sets focus to element
+  const _val = input.value; //store the value of the element
+  input.value = ''; //clear the value of the element
+  input.value = _val; //set that value back.
 }
