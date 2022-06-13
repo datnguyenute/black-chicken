@@ -47,6 +47,15 @@ ul li::before {
   color: green;
 }
 
+ul li.message:hover {
+  cursor: pointer;
+}
+
+ul li.message:hover::after {
+  content: " \21b5";
+  font-size: 0.8em;
+}
+
 ul li.sub-message {
   font-size: 10px;
   font-weight: lighter;
