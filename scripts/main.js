@@ -14,7 +14,8 @@ var titleElement = document.getElementById("title");
 var typing = false;
 var timeoutTyping = undefined;
 var socketTypeing = [];
-var textContent = "";
+var textReplyContent = "";
+var quoteSymbol = "↳ ";
 
 // Greetings
 let greetings = '';
@@ -90,16 +91,12 @@ input.addEventListener("keydown", function (e) {
 
 
 socket.on("chat-message", function (msg, count) {
-  if (textContent) {
-    var item = document.createElement("li");
-    item.textContent = `Reply: ${textContent}`;
-    item.classList.add('sub-reply');
-    messages.appendChild(item);
-    textContent = "";
-  }
+  // Checking reply message before display user's message.
+  checkReplyMessage();
 
   var item = document.createElement("li");
   item.classList.add("message");
+  msg = formatMsg(msg);
   item.textContent = msg;
   messages.appendChild(item);
 
@@ -315,20 +312,45 @@ if (
  * event.
  */
 function reply(event) {
-  const val = event.target.textContent || "";
+  const val = event.target.textContent;
   const nicknameIdx = nickName.length + 2; // 2 stands for "- "
 
   if (!val) {
     return;
   }
 
-  textContent = val.substring(nicknameIdx);
-  const doubleGreaterIdx = textContent.indexOf(">> ");
-  textContent = doubleGreaterIdx < 0 ? val.substring(nicknameIdx) : textContent.substring(doubleGreaterIdx + 3); // 3 stands for ">> "
+  textReplyContent = val.substring(nicknameIdx);
+  const quoteSymbolIdx = textReplyContent.indexOf(quoteSymbol);
+  textReplyContent = quoteSymbolIdx < 0 ? val.substring(nicknameIdx) : textReplyContent.substring(quoteSymbolIdx + 2); // 2 stands for "↳ " aka "quoteSymbol"
 
-  input.value = `>> `;
+  input.value = textReplyContent.length ? `${textReplyContent} ${quoteSymbol}` : input.value;
   input.focus(); //sets focus to element
   const _val = input.value; //store the value of the element
   input.value = ''; //clear the value of the element
   input.value = _val; //set that value back.
+}
+
+/**
+ * If the textReplyContent variable has a value, create a new list item, add the textReplyContent value
+ * to the list item, add a class to the list item, and append the list item to the messages list.
+ */
+function checkReplyMessage() {
+  if (textReplyContent) {
+    const item = document.createElement("li");
+    item.textContent = `Pre-task: ${textReplyContent}`;
+    item.classList.add('sub-reply');
+    messages.appendChild(item);
+    textReplyContent = "";
+  }
+}
+
+/**
+ * If the message contains the quote symbol, then return the message with the nickname prepended to it.
+ * Otherwise, return the message as is.
+ * @param msg - The message that the user has typed in the chat.
+ * @returns the formatted message.
+ */
+function formatMsg(msg) {
+  const quoteSymbolIdx = msg.indexOf(quoteSymbol);
+  return quoteSymbolIdx < 0 ? msg : `${nickName}- ${msg.substring(quoteSymbolIdx)}`;
 }
